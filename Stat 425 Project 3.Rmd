@@ -1,0 +1,77 @@
+---
+title: "Stat 425 Project 3"
+author: "Shorehamax"
+date: "2024-03-23"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset
+```{r}
+rt_data_ <- read.csv("C:/Users/chenh/Downloads/rt_data_.csv")
+View(rt_data_)
+attach(rt_data_)
+React=data.frame(congruency,posture,reaction_time)
+React
+```
+
+## ANOVA test
+```{r}
+
+react.aov <- aov(reaction_time ~ congruency * posture, data = React)
+
+print(react.aov)
+
+summary(react.aov)
+
+e=residuals(react.aov) 
+fitted=fitted(react.aov) 
+
+fitted.react=cbind(rt_data_,e,fitted)
+
+shapiro.test(e)
+shapiro.test(reaction_time)
+```
+
+## QQplot
+```{r}
+par(mfrow = c(2, 2))
+plot(react.aov, 1:4)
+```
+
+## Effects & r 
+```{r}
+effect_congruency= mean(reaction_time[congruency=="congruent"])-mean(reaction_time[congruency=="incongruent"])
+effect_congruency
+effect_posture =mean(reaction_time[posture=="stand"])-mean(reaction_time[posture=="sit"])
+effect_posture
+effect_interaction= mean(c(reaction_time[congruency=="congruent" & posture=="stand"],reaction_time[congruency=="incongruent" & posture=="sit"])) - mean(c(reaction_time[congruency=="congruent" & posture =="sit"],reaction_time[congruency=="incongruent" & posture =="stand"]))
+effect_interaction
+
+library(unrepx)
+SSE=summary(react.aov)[[1]]$'Sum Sq'[4]
+SSE
+SST=sum(summary(react.aov)[[1]]$'Sum Sq')
+SST
+SSmodel=SST-SSE
+
+Rsquare=SSmodel/SST
+Rsquare
+```
+## Residual plot
+```{r}
+qqnorm(e,col=7,lwd=2)
+qqline(e,col=5,lwd=2)
+```
+
+## Equal variance
+
+```{r}
+library(car)
+leveneTest(e,posture)
+leveneTest(e,congruency)
+```
+
